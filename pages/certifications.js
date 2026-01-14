@@ -1,4 +1,8 @@
+import { AnimateSharedLayout, motion } from 'framer-motion'
 import Head from 'next/head'
+import React, { useState } from 'react'
+import ConnectionCard from '../components/connections/ConnectionCard'
+import ConnectionModal from '../components/connections/ConnectionModal'
 import Base from '../layouts/Base'
 import stripHtml from '../lib/strip-html'
 import { styled } from '../stitches.config'
@@ -17,32 +21,78 @@ export async function getStaticProps() {
     return { props: meta }
 }
 
-// Sample certification data - you can replace with real data later
+// Certification data with the structure you requested
 const certifications = [
     {
-        id: 1,
         name: 'Microsoft Certified: Data Analyst Associate',
-        issuer: 'Microsoft',
-        date: 'January 2024',
-        image: '/static/images/cert-placeholder.jpg',
+        title: 'Data Analytics',
+        company: 'Microsoft',
+        status: 'Met', // Use 'Met' for completed/closed certifications
+        tags: ['Power BI', 'DAX', 'Data Modeling'],
+        location: 'Online',
+        metOn: '2024-01-15',
+        certLink: 'https://learn.microsoft.com/en-us/certifications/data-analyst-associate/',
+        linkedInLink: 'https://www.linkedin.com/feed/update/your-cert-post',
     },
     {
-        id: 2,
         name: 'Google Data Analytics Professional Certificate',
-        issuer: 'Google',
-        date: 'December 2023',
-        image: '/static/images/cert-placeholder.jpg',
+        title: 'Data Analytics',
+        company: 'Google (Coursera)',
+        status: 'Met', // Completed/Done
+        tags: ['R', 'SQL', 'Tableau', 'Data Visualization'],
+        location: 'Online',
+        metOn: '2023-12-10',
+        certLink: 'https://www.coursera.org/professional-certificates/google-data-analytics',
+        linkedInLink: 'https://www.linkedin.com/feed/update/your-cert-post',
     },
     {
-        id: 3,
+        name: 'AWS Certified Data Analytics',
+        title: 'Cloud Data Analytics',
+        company: 'Amazon Web Services',
+        status: 'Want to Meet', // Use 'Want to Meet' for needed/open certifications
+        tags: ['AWS', 'Big Data', 'Cloud'],
+        location: 'Online',
+        metOn: null,
+        certLink: 'https://aws.amazon.com/certification/certified-data-analytics-specialty/',
+        linkedInLink: null,
+    },
+    {
         name: 'Tableau Desktop Specialist',
-        issuer: 'Tableau',
-        date: 'November 2023',
-        image: '/static/images/cert-placeholder.jpg',
+        title: 'Data Visualization',
+        company: 'Tableau',
+        status: 'Want to Meet', // Needed/Open
+        tags: ['Tableau', 'Visualization', 'Dashboard'],
+        location: 'Online',
+        metOn: null,
+        certLink: 'https://www.tableau.com/learn/certification/desktop-specialist',
+        linkedInLink: null,
     },
 ]
 
 function Certifications() {
+    const [selectedCert, setSelectedCert] = useState(null)
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [searchQuery, setSearchQuery] = useState('')
+
+    const filteredCertifications = certifications.filter(
+        cert =>
+            cert.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            cert.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            cert.title.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+
+    const handleCardClick = cert => {
+        setSelectedCert(cert)
+        setIsModalOpen(true)
+    }
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false)
+        setSelectedCert(null)
+    }
+
+    const description = `My professional certifications that validate my expertise in <strong>Data Analytics</strong>, <strong>Business Intelligence</strong>, and related technologies. Completed certifications are marked as "Met" while certifications I'm working towards are marked as "Want to Meet".`
+
     return (
         <>
             <Head>
@@ -63,140 +113,90 @@ function Certifications() {
                 />
             </Head>
 
-            <Container>
-                <h1>Certifications & Credentials</h1>
-                <Description>
-                    Professional certifications that validate my expertise in data analytics, business intelligence, and related technologies.
-                </Description>
+            <AnimateSharedLayout>
+                <p dangerouslySetInnerHTML={{ __html: description }} />
 
-                <CertificationsList>
-                    {certifications.map((cert) => (
-                        <CertificationItem key={cert.id}>
-                            <CertImageWrapper>
-                                <CertImagePlaceholder>
-                                    <CertIcon className="ri-award-fill" />
-                                </CertImagePlaceholder>
-                            </CertImageWrapper>
-                            <CertDetails>
-                                <CertName>{cert.name}</CertName>
-                                <CertMeta>
-                                    <CertIssuer>{cert.issuer}</CertIssuer>
-                                    <CertDate>• {cert.date}</CertDate>
-                                </CertMeta>
-                            </CertDetails>
-                        </CertificationItem>
-                    ))}
-                </CertificationsList>
-            </Container>
+                <h2>Certifications</h2>
+                <SearchInput
+                    type="text"
+                    placeholder="Search by name, issuer, or category..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                />
+                <CertificationsGrid>
+                    {filteredCertifications.length > 0 ? (
+                        filteredCertifications.map((cert, idx) => (
+                            <motion.div
+                                key={cert.name + idx}
+                                initial={{ opacity: 0, y: 40 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{
+                                    delay: idx * 0.08,
+                                    duration: 0.5,
+                                    type: 'spring',
+                                    stiffness: 60,
+                                }}
+                            >
+                                <ConnectionCard
+                                    person={cert}
+                                    onClick={() => handleCardClick(cert)}
+                                />
+                            </motion.div>
+                        ))
+                    ) : (
+                        <NoResults>No certifications found.</NoResults>
+                    )}
+                </CertificationsGrid>
+            </AnimateSharedLayout>
+            <ConnectionModal
+                person={selectedCert}
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+            />
         </>
     )
 }
 
-const Container = styled('div', {
-    marginTop: '60px',
-    maxWidth: '900px',
-    margin: '60px auto 0',
-    padding: '0 20px',
+const CertificationsGrid = styled('div', {
+    display: 'grid',
+    margin: '10px 0 0 -20px',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+
+    '@media (max-width: 600px)': {
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        margin: '10px 0 0 0',
+    },
 })
 
-const Description = styled('p', {
-    fontSize: '16px',
-    lineHeight: '1.6',
-    color: '$secondary',
-    marginBottom: '40px',
-})
-
-const CertificationsList = styled('div', {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '24px',
-})
-
-const CertificationItem = styled('div', {
-    display: 'flex',
-    gap: '24px',
-    padding: '20px',
-    background: '$hover',
+const SearchInput = styled('input', {
+    width: '100%',
+    maxWidth: '100%',
+    boxSizing: 'border-box',
+    padding: '12px 16px',
+    margin: '20px 0',
+    border: '1px solid $secondary',
     borderRadius: '$borderRadius',
-    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-
-    '&:hover': {
-        transform: 'translateY(-2px)',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-    },
-
-    '@bp1': {
-        flexDirection: 'column',
-        alignItems: 'center',
-        textAlign: 'center',
-    },
-})
-
-const CertImageWrapper = styled('div', {
-    flexShrink: 0,
-})
-
-const CertImagePlaceholder = styled('div', {
-    width: '120px',
-    height: '120px',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    borderRadius: '8px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-
-    '@bp1': {
-        width: '100px',
-        height: '100px',
-    },
-})
-
-const CertIcon = styled('i', {
-    fontSize: '48px',
-    color: 'white',
-    opacity: 0.9,
-})
-
-const CertDetails = styled('div', {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    flex: 1,
-})
-
-const CertName = styled('h3', {
-    fontSize: '20px',
-    fontWeight: 600,
-    margin: '0 0 8px 0',
+    backgroundColor: '$background',
     color: '$primary',
-
-    '@bp1': {
-        fontSize: '18px',
+    fontSize: '16px',
+    '&::placeholder': {
+        color: '$secondary',
+    },
+    '&:focus': {
+        outline: 'none',
+        borderColor: '$cyan',
+    },
+    '@media (max-width: 600px)': {
+        fontSize: '15px',
+        padding: '10px 8px',
     },
 })
 
-const CertMeta = styled('div', {
-    display: 'flex',
-    gap: '8px',
-    fontSize: '14px',
+const NoResults = styled('div', {
     color: '$secondary',
-
-    '@bp1': {
-        flexDirection: 'column',
-        gap: '4px',
-    },
-})
-
-const CertIssuer = styled('span', {
-    fontWeight: 500,
-})
-
-const CertDate = styled('span', {
-    '@bp1': {
-        '&::before': {
-            content: 'none',
-        },
-    },
+    fontSize: '18px',
+    textAlign: 'center',
+    marginTop: '40px',
 })
 
 Certifications.Layout = Base

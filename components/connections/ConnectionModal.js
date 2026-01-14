@@ -67,9 +67,9 @@ export default function ConnectionModal({ person, isOpen, onClose }) {
               </Tags>
             )}
             <Links>
-              {person.linkedin && (
+              {(person.linkedin || person.linkedInLink) && (
                 <LinkIcon
-                  href={person.linkedin}
+                  href={person.linkedin || person.linkedInLink}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="LinkedIn"
@@ -85,12 +85,12 @@ export default function ConnectionModal({ person, isOpen, onClose }) {
                   />
                 </LinkIcon>
               )}
-              {person.twitter && (
+              {(person.twitter || person.certLink) && (
                 <LinkIcon
-                  href={person.twitter}
+                  href={person.twitter || person.certLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="Twitter"
+                  aria-label={person.certLink ? "Certificate" : "Twitter"}
                   onMouseEnter={() => tweetsRef.current?.play()}
                   onMouseLeave={() => tweetsRef.current?.stop()}
                 >
