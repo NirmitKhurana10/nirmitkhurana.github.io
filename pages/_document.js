@@ -31,6 +31,15 @@ export default class extends Document {
             sizes="any"
             type="image/x-icon"
           />
+          <link
+            rel="icon"
+            href="/favicon.svg"
+            type="image/svg+xml"
+          />
+          <link
+            rel="apple-touch-icon"
+            href="/favicon.png"
+          />
 
           <script
             async
