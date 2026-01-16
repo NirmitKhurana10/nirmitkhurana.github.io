@@ -45,7 +45,7 @@ function Contact(props) {
       const isProd = process.env.NODE_ENV === 'production'
       const base = isProd
         ? 'https://www.nirmitkhurana.site'
-        : 'http://localhost:3000'
+        : 'http://localhost:3001'
 
       // Get honeypot field value (should be empty)
       const honeypotValue = e.target.website?.value || ''
