@@ -67,7 +67,7 @@ function About(props) {
           <Paragraph>
             I love{' '}
             <strong>
-              <a href="https://nirmitkhurana.com/contact" target="_blank">
+              <a href="https://nirmitkhurana.site/contact">
                 connecting
               </a>
             </strong>{' '}
